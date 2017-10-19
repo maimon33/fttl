@@ -1,9 +1,0 @@
-README.md
-fttl.py
-setup.cfg
-fttl.egg-info/PKG-INFO
-fttl.egg-info/SOURCES.txt
-fttl.egg-info/dependency_links.txt
-fttl.egg-info/entry_points.txt
-fttl.egg-info/requires.txt
-fttl.egg-info/top_level.txt
