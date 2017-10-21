@@ -1,9 +1,9 @@
 import re
+import sys
 
 from datetime import datetime, timedelta
 
 import click
-from click_didyoumean import DYMGroup
 
 def get_datetime(minutes):
     return datetime.now() + timedelta(minutes=minutes)
@@ -11,16 +11,23 @@ def get_datetime(minutes):
 def convert_datetime_to_cron(requested_date):
     return requested_date.strftime("%M %H %d %m *")
 
-def convert_to_int_and_strip_non_numeric(ttl):
+def return_digits(ttl):
     return int(re.sub('[^0-9]','', ttl))
 
-def match_time_frame(ttl):
-    if re.search("h", ttl):
-        return convert_to_int_and_strip_non_numeric(ttl) * 60
-    elif re.search("d", ttl):
-        return convert_to_int_and_strip_non_numeric(ttl) * 1440
-    elif re.search("w", ttl):
-        return convert_to_int_and_strip_non_numeric(ttl) * 10080
+def convert_to_minutes(ttl):
+    if re.match("\d+[h,H]$", ttl):
+        return return_digits(ttl) * 60
+    elif re.match("\d+[d,D]$", ttl):
+        return return_digits(ttl) * 1440
+    elif re.match("\d+[w,W]$", ttl):
+        return return_digits(ttl) * 10080
+    elif ttl.isdigit():
+        return int(ttl)
+    else:
+        print """Bad request!
+Options for life expectancy are limited.
+You can use h, d, w or none for minutes"""
+        sys.exit()
 
 
 CLICK_CONTEXT_SETTINGS = dict(
@@ -38,5 +45,8 @@ def fttl(ttl):
     """Set life Expectancy for files in minutes.
     Use *h for Hours, *d for days, *w for weeks. 
     """
-    ttl = match_time_frame(ttl)
+    ttl = convert_to_minutes(ttl)
+    if ttl >= 525600:
+        print "File TTL cannot exceed one year"
+        sys.exit()
     print convert_datetime_to_cron(get_datetime(ttl))
